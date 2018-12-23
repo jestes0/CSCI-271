@@ -1,0 +1,177 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <algorithm>
+
+using namespace std;
+
+void inssort (int size, string* data)
+{
+    string temp = data[0];
+    for(int i = 1; i < size; i++)
+    {
+      int j = 0;
+      temp = data[i]; //sets string equal to data tem in position
+      for(j = i; j > 0 && temp < data[j - 1]; j--)
+          data[j] = data[j - 1];
+
+      data[j] = temp;
+    }
+  }
+
+// Merges two subarrays of arr[].
+// First subarray is arr[l..m]
+// Second subarray is arr[m+1..r]
+
+void merge(string* arr, int left, int mid, int right)
+{
+    int i, j, k;
+    int item1 = mid - left + 1;
+    int item2 =  right - mid;
+
+    string* leftside = new string[item1];
+    string* rightside = new string[item2];
+
+    for (i = 0; i < item1; i++)
+        leftside[i] = arr[left + i];
+    for (j = 0; j < item2; j++)
+        rightside[j] = arr[mid + 1+ j];
+
+    i = 0; // Initial index of first subarray
+    j = 0; // Initial index of second subarray
+    k = left; // Initial index of merged subarray
+
+    while (i < item1 && j < item2)
+    {
+        if (leftside[i] <= rightside[j])
+        {
+            arr[k] = leftside[i];
+            i++;
+        }
+        else
+        {
+            arr[k] = rightside[j];
+            j++;
+        }
+        k++;
+    }
+
+    while (i < item1)
+    {
+        arr[k] = leftside[i];
+        i++;
+        k++;
+    }
+
+    while (j < item2)
+    {
+        arr[k] = rightside[j];
+        j++;
+        k++;
+    }
+
+    delete[] leftside;
+    delete[] rightside;
+
+}
+
+void mergeSort(string* arr, int left, int right)
+{
+    if (left < right)
+    {
+      // Same as (l+r)/2, but avoids overflow for
+      // large l and h
+      int mid = left+(right-left) / 2; //splits array in two pieces
+
+      // Sort first and second halves
+      mergeSort(arr, left, mid); //recursive to split array
+      mergeSort(arr, mid + 1, right); //recursive that splits array
+
+      merge(arr, left, mid, right);  //runs the merge sorting
+  }
+}
+
+
+/* Driver program to test above functions */
+
+int main(int argc, char* argv[])
+{
+
+  int size; //determines the size and number of items to sort
+  int sort; //determines the type of sort to be used
+
+  size = atoi(argv[1]); //argument for size to be executed
+  sort = atoi(argv[2]); //argument for sort to be executed
+
+  if (size < 1) //checks input for less than 1
+  {
+    cout<<"Error. Cannot compute a size of less than 1.\n";
+    return 3;
+  }
+
+  string* sortdata = new string[size]; //build the dynamic array
+  if (sortdata == nullptr) //check to see if the pointer is null
+  {
+    cout << "Not enough memory!\n";
+    return 1; //ends file if condition is true
+  }
+
+  ifstream sortingfile; //opens input stream for sorts
+  sortingfile.open("sort.dat"); //file name to be used
+
+  if (sortingfile.is_open()) //checks to see if file opened
+  {
+    for (int i = 0; i < size; i++)
+    {
+      sortingfile >> sortdata[i]; //inserts items into array
+    }
+
+  sortingfile.close();
+
+  }
+
+  else //runs if file didn't open
+  {
+    cout<<"File name error. Please check your file name.\n";
+    return 2;
+  }
+
+  switch (sort)
+  {
+   case 0:
+    cout << "Insertion Sort\n";
+    inssort (size, sortdata);
+    break;
+
+   case 1:
+    cout << "Merge Sort\n";
+    mergeSort(sortdata, 0, size-1);
+    break;
+
+    default:
+    cout<<"No Sort type selected.\n";
+    break;
+  }
+
+  ofstream sortedfile; //output stream
+  sortedfile.open("sorted.dat"); //opens the output file
+  if (sortedfile.is_open()) //checks to see if file opened
+  {
+  for (int i = 0; i < size; i++)
+  {
+          sortedfile << sortdata[i]; //inserts items into file
+          sortedfile << '\n';
+  }
+
+  delete[] sortdata;
+  sortedfile.close();
+  }
+
+  else //runs if file does not sucessfully open
+  {
+      delete[] sortdata;
+      cout<<"Error. Unable to write to file.\n";
+  }
+
+  return 0;
+}
